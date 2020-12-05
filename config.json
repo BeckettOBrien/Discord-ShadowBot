@@ -1,0 +1,55 @@
+{
+    "prefix": "+",
+
+    "rules": "Rules not found. Please dm a server administrator for help.",
+
+    "embedColor": 3092790,
+
+    "status": {
+        "status": "online",
+        "activity": {
+            "type": "WATCHING",
+            "name": "from the shadows"
+        }
+    },
+
+    "bitrate": 64,
+    "streamBuffer": 5000,
+
+    "debug": "false",
+
+    "guildId": "",
+    "roles": {
+        "general": "",
+        "muted": "",
+        "notifications": ""
+    },
+    "channels": {
+        "rules": ""
+    },
+
+    "perms": [
+        "admin",
+        "perms.*",
+        "perms.edit",
+        "perms.list",
+        "perms.listother",
+        "music.*",
+        "music.play",
+        "music.volume",
+        "mute.*",
+        "announce.*",
+        "request.*"
+    ],
+
+    "bucketName": "",
+
+    "token": "",
+
+    "youtubeApiToken": "",
+    "spotify": {
+        "clientId": "",
+        "secret": "",
+        "clientCredentialsAuth": ""
+    }
+}
