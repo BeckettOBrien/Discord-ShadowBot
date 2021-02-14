@@ -536,7 +536,7 @@ function spotifyPlaylistQueue(playlistUrl, message) {
             }
         }
         var limit = 5;
-        if (message.content.split(' ')[3] & !isNaN(parseInt(message.content.split(' ')[3]))) {
+        if (message.content.split(' ')[3] && !isNaN(parseInt(message.content.split(' ')[3]))) {
             limit = parseInt(message.content.split(' ')[3]);
         }
         for (track of (message.content.split(' ')[2] === 'yes' ? shuffle(tracks).slice(0,limit) : tracks.slice(0,limit))) {
