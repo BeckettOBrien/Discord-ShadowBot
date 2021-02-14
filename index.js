@@ -25,7 +25,7 @@ const request = require('request');
 var muteTimers = {};
 var welcomeMessageId = "";
 var queue = [];
-
+var repeat = false;
 
 client.once("ready", async () => {
     fs.readFile('./RULES.txt', 'utf-8', (err, data) => {
@@ -139,7 +139,6 @@ function handleCommand(name, message) {
         case "play":
             if (message.content.split(' ').length === 1) {
                 return message.channel.send(`Please enter all arguments correctly:\n\`\`\`${config.prefix}play <song>\n${config.prefix}play <spotify playlist url> [shuffle:yes/no] [limit]\`\`\``)
-                // return message.channel.send("Please Enter a video name");
             }
             return queueSong(message);
         case "stop":
@@ -166,13 +165,25 @@ function handleCommand(name, message) {
             }
             for (song of queue) {
                 if (song == queue[0]) {
-                    // message.channel.send(`Now playing \`${song.title}\``);
                     message.channel.send({ embed: nowPlayingEmbed(song) });
                 } else {
                     message.channel.send(`\`${song.title}\` queued in position \`${queue.indexOf(song)+1}\` for channel: ${song.channel.toString()}`);
                 }
             }
             return;
+            case "loop":
+                if (message.content.split(' ').length < 2) {
+                    return message.channel.send(`Queue looping is ${(repeat ? "on" : "off")}`);
+                }
+                if (!(authorPerms.includes("admin") | authorPerms.includes("music.*") | authorPerms.includes("music.play"))) {
+                    return message.channel.send("You do not have permission to run this command. Requires `music.play`");
+                }
+                if (message.content.split(' ')[1] == "on") {
+                    repeat = true;
+                } else if (message.content.split(' ')[1] == "off") {
+                    repeat = false;
+                }
+                return message.channel.send(`Queue looping is ${(repeat ? "on" : "off")}`);
         case "volume":
             const authorPerms = getPerms(message.author, message.member);
             if (!(authorPerms.includes("admin") | authorPerms.includes("music.*") | authorPerms.includes("music.volume"))) {
@@ -241,7 +252,7 @@ function help(message) {
             "fields": [
             {
                 "name": "Music",
-                "value": `\`${config.prefix}play\`, \`${config.prefix}pause\`,\`${config.prefix}resume\`,\`${config.prefix}stop\`, \`${config.prefix}skip\`,\`${config.prefix}volume\`,\`${config.prefix}queue\``
+                "value": `\`${config.prefix}play\`, \`${config.prefix}pause\`,\`${config.prefix}resume\`,\`${config.prefix}stop\`, \`${config.prefix}skip\`,\`${config.prefix}volume\`,\`${config.prefix}queue\`,\`${config.prefix}loop\``
             },
             {
                 "name": "User",
@@ -300,6 +311,9 @@ function help(message) {
             break;
         case "queue":
             out = `Shows the current music queue.\nUsage: \`${config.prefix}queue\``;
+            break;
+        case "loop":
+            out = `Enables/Disables looping of the music queue\nUsage: \`${config.prefix}loop [on/off]\`\nPermissions: \`music.play\``;
             break;
         case "volume":
             out = `Returns the current global volume of the music or sets the volume to the specified percentage.\nUsage: \`${config.prefix}volume [amount]\``;
@@ -605,7 +619,10 @@ function startQueueForChannel() {
         const dispatcher = connection.play(stream, {bitrate:config.bitrate*1000,type:'opus',highWaterMark:config.streamBuffer});
 
         dispatcher.on("finish", () => {
-            queue.shift();
+            qqueue.shift();
+            if (repeat) {
+                queue.push(songData);
+            }
             if (queue.length === 0) {
                 songData.channel.leave();
             } else if (songData.channel == queue[0].channel) {
@@ -646,6 +663,9 @@ async function nextForChannel(connection) {
 
     dispatcher.on("finish", () => {
         queue.shift();
+        if (repeat) {
+            queue.push(songData);
+        }
         if (queue.length === 0) {
             songData.channel.leave();
         } else if (songData.channel == queue[0].channel) {
